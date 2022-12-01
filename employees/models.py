@@ -15,6 +15,14 @@ class Subdivision(MPTTModel):
         verbose_name='Родитель',
     )
 
+    class Meta:
+        verbose_name = 'Подразделение'
+        verbose_name_plural = 'Подразделения'
+
+    def __str__(self):
+        pre = f'{self.parent} | ' if self.parent else ''
+        return f'{pre}{self.name} | {self.name}'
+
     def get_employees(self):
         return [
             {
@@ -45,10 +53,6 @@ class Subdivision(MPTTModel):
         ]
         return data
 
-    def __str__(self):
-        pre = f'{self.parent} | ' if self.parent else ''
-        return f'{pre}{self.name} | {self.name}'
-
 
 class Employee(models.Model):
     fullname = models.CharField(max_length=255, verbose_name='ФИО')
@@ -58,3 +62,10 @@ class Employee(models.Model):
     subdivision = TreeForeignKey(Subdivision, on_delete=models.CASCADE, related_name='employees',
                                  blank=True, null=True,
                                  verbose_name='Подразделение')
+
+    class Meta:
+        verbose_name = 'Сотрудник'
+        verbose_name_plural = 'Сотрудники'
+
+    def __str__(self):
+        return self.fullname

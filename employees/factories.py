@@ -6,7 +6,6 @@ from .models import Subdivision, Employee
 
 class SubdivisionFactory(DjangoModelFactory):
     name = factory.Faker('job')
-    # parent = factory.SubFactory('SubdivisionFactory')
 
     class Meta:
         model = Subdivision
@@ -20,5 +19,3 @@ class EmployeeFactory(DjangoModelFactory):
 
     class Meta:
         model = Employee
-
-
