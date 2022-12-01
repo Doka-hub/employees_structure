@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load to_json %}
+
+{% block title %}
+	Подразделения
+{% endblock %}
+
+{% block nav-head %}
+	<li>
+		<a href="{% url 'head' %}" class="nav-link text-white">
+			<svg class="bi d-block mx-auto mb-1" xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" class="bi bi-house-door-fill" viewBox="0 0 16 16">
+				<path d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5Z"/>
+			</svg>
+			Главная
+		</a>
+	</li>
+{% endblock %}
+{% block nav-subdivision %}
+	<li>
+		<a href="{% url 'subdivision-list' %}" class="nav-link text-secondary">
+			<svg class="bi d-block mx-auto mb-1" xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="rgba(255, 255, 255, .4)" class="bi bi-card-list" viewBox="0 0 16 16">
+				<path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+				<path d="M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8zm0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-1-5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zM4 8a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm0 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+			</svg>
+			Подразделения
+		</a>
+	</li>
+{% endblock %}
+
+{% block content %}
+	<div class="container mt-3">
+		<div class="alert alert-warning alert-dismissible fade show" role="alert">
+			<strong>Вы можете выбрать</strong> подразделение, нажав на него, чтобы посмотреть список сотрудников
+		</div>
+
+		<div id="tree" class="mb-3"></div>
+		<table id="grid"></table>
+	</div>
+	<script>
+        // functions
+        let getEmployees = async (subdivisionId) =>
+            await $.ajax({
+                method: 'get',
+                url: `/subdivision-list/${subdivisionId}/employees/`,
+            });
+
+        let data = {{ data|json_format|safe }},
+            employees_data = [],
+            tree = $('#tree').tree({
+                dataSource: data,
+                textField: 'name',
+                primaryKey: 'id',
+                uiLibrary: 'bootstrap5',
+            }),
+            grid = $('#grid');
+
+        tree.on('select', async function (e, node, id) {
+            employees_data = await getEmployees(id);
+            grid.grid('destroy', true, true);
+            grid.grid({
+                dataSource: employees_data,
+                columns: [
+                    {field: 'fullname', sortable: true},
+                    {field: 'position', sortable: true},
+                    {field: 'date_joined', sortable: true},
+                    {field: 'salary', sortable: true},
+                ],
+                pager: {limit: 10},
+            })
+        });
+
+	</script>
+{% endblock %}
